@@ -1,0 +1,15 @@
+.headerButton{
+    outline: none;
+    box-shadow: none;
+    background-color: transparent;
+    outline-offset: none;
+}
+.headerButton:hover, .headerButton:active, .headerButton:focus{
+    background-color: transparent;
+    outline: none;
+    outline-offset: none;
+    box-shadow: none;
+}
+.iconButton{
+    padding-bottom: 9px;
+}
