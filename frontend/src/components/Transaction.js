@@ -11,6 +11,15 @@ export default class Transaction extends Component {
           <Card.Header><b>Transaction:</b> {this.props.tx.txid}</Card.Header>
           <Card.Body>
             <Container>
+                <Row>
+                    <Col>
+                    <p className="alignLeft">Net Exchanged</p> 
+                    <p className="alignRight">
+                        {this.props.tx.vout.reduce( function(a, b){ return a + b.value; }, 0)}
+                    </p>
+                    <hr className="columnRuler"/>
+                    </Col>
+                </Row>
                 {this.props.tx.vout.map(v => (
                         <>
                             <Row>
@@ -25,7 +34,7 @@ export default class Transaction extends Component {
                                 </Col>
                                 <Col>
                                     <div>
-                                        <p className="alignLeft">Receiving Address </p> 
+                                        <p className="alignLeft">Receiving Addr </p> 
                                         <p className="alignRight">
                                             {v.scriptPubKey.addresses ? v.scriptPubKey.addresses.map(addr => (addr)) : <></>}
                                         </p>

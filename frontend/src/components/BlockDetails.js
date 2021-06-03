@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import { Col, Container, Row } from 'react-bootstrap';
+import { Col, Container, Row, Spinner, Alert } from 'react-bootstrap';
 import {Transaction} from './index'
 import './style/BlockDetails.scss'
 
@@ -9,7 +9,8 @@ export default class BlockDetails extends Component {
     super(props);
     this.state = {
       block: {height: 0},
-      transactions: []
+      transactions: [],
+      transactionsLoading: true,
     };
   }
 
@@ -21,7 +22,10 @@ export default class BlockDetails extends Component {
 
     axios
     .get(`/transactions/${this.props.match.params.blockHeight}`)
-    .then((res) => this.setState({transactions: res.data}))
+    .then((res) => this.setState({
+      transactions: res.data,
+      transactionsLoading: false
+    }))
     .catch((err) => console.log(err));
 
   }
@@ -30,7 +34,7 @@ export default class BlockDetails extends Component {
 
     return (
       <main className="container">
-        <h2 className="text-black my-4">Block {this.props.match.params.blockHeight}</h2>
+        <h2 className="text-black my-4">Block: {this.props.match.params.blockHeight}</h2>
         <hr className="headRuler"/>
         <div className="blockdetails">
           <Container>
@@ -68,7 +72,32 @@ export default class BlockDetails extends Component {
             </Row>
           </Container>
           <h3 className="text-black my-4">Transactions </h3>
-          <hr className="bodyRuler"/>
+          <hr className="headRuler2"/>
+          <Alert variant="dark">
+            <p className="alignLeft">
+              Net Exchanged This Block
+            </p>
+            <p className="alignRight">
+              {this.state.transactionsLoading ? 
+              <div className="centerSpinner"><Spinner animation="border" role="status" size="sm"></Spinner></div> : 
+              <>
+                {this.state.transactions.reduce( 
+                  function(x, y) { 
+                    return x + y.vout.reduce( 
+                      function(a, b){ 
+                        return a + b.value; 
+                      }, 
+                      0
+                    );
+                  },
+                  0
+                )}
+              </> 
+              }
+            </p>
+            <br/>
+          </Alert>
+          {this.state.transactionsLoading ? <div className="centerSpinner"><Spinner animation="border" role="status"></Spinner></div> : <></> }
           {this.state.transactions.map(tx => (
             <>
             <Transaction key={tx.txid} tx={tx}/>
