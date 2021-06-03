@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import {Table, Button} from 'react-bootstrap';
+import {Table, Button, Spinner} from 'react-bootstrap';
 import {HeaderOverlay} from './index'
+import { Link } from "react-router-dom";
 import axios from "axios";
+import './style/BlockTable.scss'
 
 const headerInfo = {
   'Height': {
@@ -16,6 +18,7 @@ export default class BlockTable extends Component {
       this.state = {
         blocksWanted: 25,
         blockList: [],
+        loading: true
       }
     }
 
@@ -24,16 +27,23 @@ export default class BlockTable extends Component {
       this.getBlocks(this.state.blocksWanted);
     }
   
-    getBlocks = (blocksWanted) => {
+    getBlocks = () => {
       axios
-      .get("/recent/" + blocksWanted)
-      .then((res) => this.setState({blockList: res.data}))
+      .get("/recent/" + this.state.blocksWanted)
+      .then((res) => this.setState({
+        blockList: res.data,
+        loading: false,
+      }))
       .catch((err) => console.log(err));
     };
 
     handleShowMoreClick = () => {
-      this.setState({blocksWanted: this.state.blocksWanted+25})
-      this.getBlocks(this.state.blocksWanted)
+      this.setState({
+        blocksWanted: this.state.blocksWanted+25,
+        loading: true
+      }, 
+        () => {this.getBlocks(this.state.blocksWanted)}
+        )
     }
 
   render = () => {
@@ -55,8 +65,8 @@ export default class BlockTable extends Component {
                 </thead>
                 <tbody>
                   {this.state.blockList.map(block => (
-                    <tr>
-                        <a href={"/block"}><td>{block.height}</td></a>
+                    <tr key={block.height}>
+                        <td><Link to={'/block/'+block.height} variant='secondary'>{block.height}</Link></td>
                         <td>{block.time}</td>
                         <td>{block.transactions}</td>
                         <td>{block.confirmations}</td>
@@ -67,8 +77,8 @@ export default class BlockTable extends Component {
                 </tbody>
               </Table>
             </div>
+            {this.state.loading ? <div className="centerSpinner"><Spinner animation="border" role="status"></Spinner></div> : <div /> }
             <div className="text-center"><Button  onClick={this.handleShowMoreClick} variant="outline-dark">———— Show More ————</Button></div>
-            <div></div>
         </main>
           
         );

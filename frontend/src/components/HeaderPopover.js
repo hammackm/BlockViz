@@ -2,9 +2,6 @@ import React, { Component } from 'react';
 import {Popover}  from 'react-bootstrap';
 
 export default class headerPopover extends Component {
-    constructor(props) {
-        super(props);
-      }
 
   render = () => {
 

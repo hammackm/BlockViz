@@ -10,6 +10,7 @@ export default class TitleBar extends Component {
             <Navbar.Brand href="/">BlockViz</Navbar.Brand>
             <Nav className="mr-auto">
               <Nav.Link href="/">Most Recent</Nav.Link>
+              <Nav.Link href="/livechain"><b>LiveChain</b></Nav.Link>
               <Nav.Link href="/analytics">Analytics</Nav.Link>
               <Nav.Link href="/about">About</Nav.Link>
             </Nav>

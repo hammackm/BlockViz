@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 
-export default class About extends Component {
+export default class LiveChain extends Component {
 
   render = () => {
 
     return (
-        <div className="about">
+        <div className="livechain">
           <div class="container">
-            <h1 class="font-weight-light">About</h1>
+            <h1 class="font-weight-light">LiveChain</h1>
             <p>
                 Lorem Ipsum is simply dummy text of the printing and typesetting
                 industry. Lorem Ipsum has been the industry's standard dummy text

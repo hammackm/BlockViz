@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { TitleBar, Footer, BlockTable, About, BlockDetails, Analytics} from "./components";
-import axios from "axios";
+import { TitleBar, Footer, BlockTable, About, BlockDetails, Analytics, LiveChain} from "./components";
 
 class App extends Component {
   constructor(props) {
@@ -11,12 +10,12 @@ class App extends Component {
     };
   }
 
-  getBlockByHeight = (height) => {
-    axios
-    .get("/height/" + height)
-    .then((res) => this.setState({blockSelected: res.data}))
-    .catch((err) => console.log(err));
-  };
+  blockSelectedCallback = (blockSelectedBelow) => {
+    console.log('callback ran: ' + blockSelectedBelow.height)
+    this.setState({blockSelected: blockSelectedBelow})
+    console.log('State after set state: ')
+    console.log(this.state)
+  }
   
 
   render() {
@@ -27,8 +26,9 @@ class App extends Component {
           <Switch>
             <Route path="/" exact component={() => <BlockTable blocks={this.state.blockList}/>} />
             <Route path="/about" exact component={() => <About />} />
-            <Route path={"/block"} exact component={() => <BlockDetails block={this.state.blockSelected}/>} />
+            <Route path="/block/:blockHeight" component={BlockDetails} />
             <Route path="/analytics" exact component={() => <Analytics />} />
+            <Route path="/livechain" exact component={() => <LiveChain />} />
           </Switch>
           <Footer />
         </Router>

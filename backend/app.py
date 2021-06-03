@@ -9,4 +9,4 @@ def getMostRecentDynamic(number):
 
 @app.route('/height/<height>')
 def getBlockByHeight(height):
-    return cli.getBlockByHeight(int(height))
+    return cli.getBlockByHeight(height)
