@@ -1,6 +1,19 @@
 .headRuler{
     border-top: 2px solid black;
+    padding-bottom: 20px;
 }
 .bodyRuler{
     border-top: 1px solid #888;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+.columnRuler{
+    margin-top: 23px;
+}
+.alignLeft{
+    float: left;
+    font-weight: bold;
+}
+.alignRight{
+    float: right;
 }

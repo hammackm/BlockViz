@@ -4,7 +4,7 @@ import { InfoCircle } from 'react-bootstrap-icons';
 import { HeaderPopover} from './index'
 import './style/Overlay.scss';
 
-export default class HeaderOverlay extends Component {
+export default class BlockHeightOverlay extends Component {
 
   render = () => {
 

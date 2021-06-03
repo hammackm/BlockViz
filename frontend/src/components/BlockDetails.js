@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from "axios";
 import { Col, Container, Row } from 'react-bootstrap';
+import {Transaction} from './index'
 import './style/BlockDetails.scss'
 
 export default class BlockDetails extends Component {
@@ -8,13 +9,19 @@ export default class BlockDetails extends Component {
     super(props);
     this.state = {
       block: {height: 0},
+      transactions: []
     };
   }
 
   componentDidMount() {
     axios
     .get(`/height/${this.props.match.params.blockHeight}`)
-    .then((res) => {this.setState({block: res.data}); console.log(res)})
+    .then((res) => this.setState({block: res.data}))
+    .catch((err) => console.log(err));
+
+    axios
+    .get(`/transactions/${this.props.match.params.blockHeight}`)
+    .then((res) => this.setState({transactions: res.data}))
     .catch((err) => console.log(err));
 
   }
@@ -27,26 +34,47 @@ export default class BlockDetails extends Component {
         <hr className="headRuler"/>
         <div className="blockdetails">
           <Container>
-          <Row>
-              <Col><div><b>Hash</b> {this.state.block.hash}</div></Col>
-            </Row>
-            <hr />
             <Row>
-              <Col><b>Difficulty</b> {this.state.block.difficulty}</Col>
-              <Col><b>Size</b> {this.state.block.size}</Col>
+              <Col><div><p className="alignLeft">Hash</p> <p className="alignRight">{this.state.block.hash}</p></div><hr className="columnRuler"/></Col>
             </Row>
-            <hr />
             <Row>
-              <Col><b>Transactions</b> {this.state.block.nTx}</Col>
-              <Col><b>Confirmations</b> {this.state.block.confirmations}</Col>
-              <Col><b>Nonce</b> {this.state.block.nonce}</Col>
+              <Col><div><p className="alignLeft">Previous Block Hash</p> <p className="alignRight">{this.state.block.previousblockhash}</p></div><hr className="columnRuler"/></Col>
             </Row>
-            <hr />
+            <Row>
+              <Col><div><p className="alignLeft">Next Block Hash</p> <p className="alignRight">{this.state.block.nextblockhash}</p></div><hr className="columnRuler"/></Col>
+            </Row>
+            <Row>
+              <Col><div><p className="alignLeft">Merkle Root</p> <p className="alignRight">{this.state.block.merkleroot}</p></div><hr className="columnRuler"/></Col>
+            </Row>
+            <hr className="bodyRuler"/>
+            <Row>
+              <Col><p className="alignLeft">Difficulty</p> <p className="alignRight">{this.state.block.difficulty}</p><hr className="columnRuler"/></Col>
+              <Col><p className="alignLeft">Version</p> <p className="alignRight">{this.state.block.version}</p><hr className="columnRuler"/></Col>
+            </Row>
+            <Row>
+              <Col><p className="alignLeft">Timestamp</p> <p className="alignRight">{this.state.block.time}</p><hr className="columnRuler"/></Col>
+              <Col><p className="alignLeft">Median Time</p> <p className="alignRight">{this.state.block.mediantime}</p><hr className="columnRuler"/></Col>
+            </Row>
+            <hr className="bodyRuler"/>
+            <Row>
+              <Col><p className="alignLeft">Transactions</p> <p className="alignRight">{this.state.block.nTx}</p><hr className="columnRuler"/></Col>
+              <Col><p className="alignLeft">Confirmations</p> <p className="alignRight">{this.state.block.confirmations}</p><hr className="columnRuler"/></Col>
+              <Col><p className="alignLeft">Nonce</p> <p className="alignRight">{this.state.block.nonce}</p><hr className="columnRuler"/></Col>
+            </Row>
+            <Row>
+              <Col><p className="alignLeft">Size</p> <p className="alignRight">{this.state.block.size}</p><hr className="columnRuler"/></Col>
+              <Col><p className="alignLeft">Weight</p> <p className="alignRight">{this.state.block.weight}</p><hr className="columnRuler"/></Col>
+              <Col><p className="alignLeft">Bits</p> <p className="alignRight">{this.state.block.bits}</p><hr className="columnRuler"/></Col>
+            </Row>
           </Container>
           <h3 className="text-black my-4">Transactions </h3>
           <hr className="bodyRuler"/>
-          {this.state.block.tx}
-
+          {this.state.transactions.map(tx => (
+            <>
+            <Transaction key={tx.txid} tx={tx}/>
+            <br/>
+            </>
+          ))}
         </div>
       </main>
       );

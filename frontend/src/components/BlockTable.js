@@ -1,16 +1,9 @@
 import React, { Component } from 'react';
 import {Table, Button, Spinner} from 'react-bootstrap';
-import {HeaderOverlay} from './index'
+import {BlockHeightOverlay} from './index'
 import { Link } from "react-router-dom";
 import axios from "axios";
 import './style/BlockTable.scss'
-
-const headerInfo = {
-  'Height': {
-    'headText': 'Block Height',
-    'bodyText': 'Height of the Vertcoin blockchain',
-  }
-}
 
 export default class BlockTable extends Component {
     constructor(props) {
@@ -55,7 +48,7 @@ export default class BlockTable extends Component {
               <Table striped bordered hover variant="dark">
                 <thead>
                   <tr>
-                    <th>Block Height <HeaderOverlay {...headerInfo.height}/></th>
+                    <th>Block Height <BlockHeightOverlay/></th>
                     <th>Timestamp</th>
                     <th># Transactions</th>
                     <th># Confirmations</th>
@@ -68,7 +61,7 @@ export default class BlockTable extends Component {
                     <tr key={block.height}>
                         <td><Link to={'/block/'+block.height} variant='secondary'>{block.height}</Link></td>
                         <td>{block.time}</td>
-                        <td>{block.transactions}</td>
+                        <td>{block.nTx}</td>
                         <td>{block.confirmations}</td>
                         <td>{block.size}</td>
                         <td>{block.difficulty}</td>
