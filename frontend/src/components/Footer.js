@@ -7,7 +7,7 @@ export default class Footer extends Component {
     render = () => {
     
         return (
-            <Navbar className="bvFooter" bg="dark" variant="dark" sticky="bottom">
+            <Navbar className="bvFooter" style={{backgroundColor: '#198652'}} variant="dark" sticky="bottom">
                 <Nav className="me-auto">
                     <Nav.Link href="/">BlockViz</Nav.Link>
                 </Nav>

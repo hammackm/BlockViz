@@ -13,7 +13,12 @@ def getMostRecentBlockHash() -> str:
 def getHashByHeight(height: int):
     return subprocess.check_output([os.path.join(os.getcwd(), 'vertcoin', 'vertcoin-cli.exe'), 'getblockhash', height]).decode().replace('\r\n', '')
 
-def getTransaction(transaction_hash: str, block_hash: str):
+def getTransactionByBlockHash(transaction_hash: str, block_hash: str):
     return eval(
         subprocess.check_output([os.path.join(os.getcwd(), 'vertcoin', 'vertcoin-cli.exe'), 'getrawtransaction', transaction_hash, str(1), block_hash]).decode().replace('\r\n', '').replace('true', 'True').replace('false', 'False')
         )
+
+def getTransactionByTxid(txid):
+    return eval(
+        subprocess.check_output([os.path.join(os.getcwd(), 'vertcoin', 'vertcoin-cli.exe'), 'getrawtransaction', txid, str(1)]).decode().replace('\r\n', '').replace('true', 'True').replace('false', 'False')
+    )

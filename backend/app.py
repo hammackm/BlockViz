@@ -14,3 +14,7 @@ def getBlockByHeight(height):
 @app.route('/transactions/<height>')
 def getTransactionsByHeight(height):
     return cli.getTransactionsByHeight(height)
+
+@app.route('/transaction/<txid>')
+def getTransactionbyTxid(txid):
+    return cli.getTransactionbyTxid(txid)

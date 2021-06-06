@@ -35,7 +35,6 @@ export default class BlockDetails extends Component {
     return (
       <main className="container">
         <h2 className="text-black my-4">Block: {this.props.match.params.blockHeight}</h2>
-        <hr className="headRuler"/>
         <div className="blockdetails">
           <Container>
             <Row>
@@ -72,12 +71,11 @@ export default class BlockDetails extends Component {
             </Row>
           </Container>
           <h3 className="text-black my-4">Transactions </h3>
-          <hr className="headRuler2"/>
           <Alert variant="dark">
-            <p className="alignLeft">
+            <div className="alignLeft">
               Net Exchanged This Block
-            </p>
-            <p className="alignRight">
+            </div>
+            <div className="alignRight">
               {this.state.transactionsLoading ? 
               <div className="centerSpinner"><Spinner animation="border" role="status" size="sm"></Spinner></div> : 
               <>
@@ -93,16 +91,16 @@ export default class BlockDetails extends Component {
                   0
                 )}
               </> 
-              }
-            </p>
+              } VTC
+            </div>
             <br/>
           </Alert>
           {this.state.transactionsLoading ? <div className="centerSpinner"><Spinner animation="border" role="status"></Spinner></div> : <></> }
           {this.state.transactions.map(tx => (
-            <>
-            <Transaction key={tx.txid} tx={tx}/>
+            <div key={tx.txid}>
+            <Transaction tx={tx}/>
             <br/>
-            </>
+            </div>
           ))}
         </div>
       </main>

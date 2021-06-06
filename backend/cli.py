@@ -42,7 +42,7 @@ def getBlockByHeight(height: int):
 
 def getTransaction(transaction_hash: str, block_hash: str):
 
-    transaction = c.getTransaction(transaction_hash, block_hash)
+    transaction = c.getTransactionByBlockHash(transaction_hash, block_hash)
 
     return json.dumps(transaction)
 
@@ -61,6 +61,11 @@ def getTransactionsByHeight(height: int):
         tx_objects_list.append(tx)
 
     return json.dumps(tx_objects_list)
+
+def getTransactionbyTxid(txid: str):
+
+    transaction = c.getTransactionByTxid(txid)
+    return json.dumps(transaction)
 
 def cleanBlock(block: dict) -> dict:
 
