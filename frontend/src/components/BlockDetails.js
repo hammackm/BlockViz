@@ -78,20 +78,15 @@ export default class BlockDetails extends Component {
             <div className="alignRight">
               {this.state.transactionsLoading ? 
               <div className="centerSpinner"><Spinner animation="border" role="status" size="sm"></Spinner></div> : 
-              <>
+              <><>
                 {this.state.transactions.reduce( 
                   function(x, y) { 
                     return x + y.vout.reduce( 
-                      function(a, b){ 
-                        return a + b.value; 
-                      }, 
-                      0
-                    );
-                  },
-                  0
+                      function(a, b){ return a + b.value; }, 0 );
+                  }, 0
                 )}
-              </> 
-              } VTC
+              </> VTC</> 
+              } 
             </div>
             <br/>
           </Alert>

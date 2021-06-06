@@ -23,12 +23,10 @@ export default class Transaction extends Component {
 
     componentDidMount() {
 
-        let newtxidToVinAddressAmountMap = {}
-
         this.props.tx.vin
         .filter(vin => !vin.coinbase)
         .forEach(e => {
- 
+
             axios
                 .get(`/transaction/${e.txid}`)
                 .then((res) => {
@@ -37,23 +35,23 @@ export default class Transaction extends Component {
                     let txidAddress = transaction.vout[e.vout].scriptPubKey.addresses[0]
                     let txidAmount = transaction.vout[e.vout].value
     
-                    newtxidToVinAddressAmountMap = {...newtxidToVinAddressAmountMap, [txid] : { 
+                    let newtxidToVinAddressAmountMap = {...this.state.txidToVinAddressAmountMap, [txid] : { 
                         'address': txidAddress,
                         'amount': txidAmount,
                     }}
     
-                    
+                    this.setState({txidToVinAddressAmountMap: newtxidToVinAddressAmountMap })
                 })
                 .catch((err) => console.log(err));
         });
 
-        this.setState({txidToVinAddressAmountMap: newtxidToVinAddressAmountMap })
+        
     
       }
 
   render = () => {
     
-    console.log("render called")
+    console.log("render")
     console.log(this.state.txidToVinAddressAmountMap)
     return (
         <Accordion>
@@ -95,26 +93,45 @@ export default class Transaction extends Component {
                                 </Col>
                             </Row>
                             {[...Array(Math.max(this.props.tx.vin.length, this.props.tx.vout.length))].map((e, indx) => (
-                                    <div key={e}>
-                                        <Row>
-                                            <Col xs={6}>
-                                                <div>
-                                                    <p className="alignLeftNotStrong">{this.props.tx.vin[indx] ? <>{this.props.tx.vin[indx].coinbase ? <>Coinbase</> : this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid]+"... vout: "+this.props.tx.vin[indx].vout}</> : <></>}</p>
-                                                </div>
-                                            </Col>
-                                            <Col xs={4}>
-                                                <div>
-                                                    <p className="alignLeftNotStrong"> {this.props.tx.vout[indx] ? <>{this.props.tx.vout[indx].scriptPubKey.addresses ? this.props.tx.vout[indx].scriptPubKey.addresses.map(addr => (addr)) : <>Not Available</>}</> : <></>} </p> 
-                                                </div>
-                                            </Col>
-                                            <Col xs={2}>
-                                                <p className="alignRight">
-                                                    {this.props.tx.vout[indx] ? <>{this.props.tx.vout[indx].value} VTC</> : <></>}
+                                <div key={e}>
+                                    <Row>
+                                        <Col xs={6}>
+                                            <div> {/* Im sorry in advance. Frontend is not my strong suit—js and functional programming is not my strong suit*/}
+                                                <p className="alignLeftNotStrong">
+                                                    {this.props.tx.vin[indx] ? 
+                                                    <>{this.props.tx.vin[indx].coinbase ? 
+                                                        <>Coinbase</> : 
+                                                        this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid] ? 
+                                                            this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid].address+" -> "+this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid].amount :
+                                                            <></>
+                                                        }
+                                                    </> : 
+                                                    <></>}
                                                 </p>
-                                            </Col>
-                                        </Row>
-                                    </div>
-                                ))}
+                                            </div>
+                                        </Col>
+                                        <Col xs={4}>
+                                            <div>
+                                                <p className="alignLeftNotStrong">
+                                                    {this.props.tx.vout[indx] ? 
+                                                    <>{this.props.tx.vout[indx].scriptPubKey.addresses ? 
+                                                        this.props.tx.vout[indx].scriptPubKey.addresses.map(addr => (addr)) : 
+                                                        <>Not Available</>}
+                                                    </> : 
+                                                    <></>}
+                                                </p> 
+                                            </div>
+                                        </Col>
+                                        <Col xs={2}>
+                                            <p className="alignRight">
+                                                {this.props.tx.vout[indx] ? 
+                                                <>{this.props.tx.vout[indx].value} VTC</> : 
+                                                <></>}
+                                            </p>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            ))}
                             </Container>
                     </Card.Body>
                 </Accordion.Collapse>
