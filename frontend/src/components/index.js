@@ -7,5 +7,6 @@ export { default as BlockDetails } from "./BlockDetails";
 export { default as Analytics } from "./Analytics";
 export { default as BlockHeightOverlay } from "./BlockHeightOverlay";
 export { default as HeaderPopover } from "./HeaderPopover";
-export { default as LiveChain } from "./LiveChain";
 export { default as Transaction } from "./Transaction";
+export { default as TransactionTable } from "./TransactionTable";
+export { default as TransactionDetails } from "./TransactionDetails";

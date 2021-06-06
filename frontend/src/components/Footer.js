@@ -11,6 +11,11 @@ export default class Footer extends Component {
                 <Nav className="me-auto">
                     <Nav.Link href="/">BlockViz</Nav.Link>
                 </Nav>
+                <Navbar.Collapse className="justify-content-end">
+                    <Navbar.Text>
+                        Pre-Alpha 0.0.1
+                    </Navbar.Text>
+                </Navbar.Collapse>
           </Navbar>
         );
       };

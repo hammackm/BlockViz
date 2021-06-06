@@ -22,3 +22,8 @@ def getTransactionByTxid(txid):
     return eval(
         subprocess.check_output([os.path.join(os.getcwd(), 'vertcoin', 'vertcoin-cli.exe'), 'getrawtransaction', txid, str(1)]).decode().replace('\r\n', '').replace('true', 'True').replace('false', 'False')
     )
+
+def getMemPool():
+    return eval(
+        subprocess.check_output([os.path.join(os.getcwd(), 'vertcoin', 'vertcoin-cli.exe'), 'getrawmempool']).decode().replace('\r\n', '')
+    )

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import { Card, Container, Col, Row, Accordion, Button, useAccordionToggle } from 'react-bootstrap';
+import { Card, Container, Col, Row, Accordion, Button, useAccordionToggle} from 'react-bootstrap';
+import { Link } from "react-router-dom";
 import './style/Transaction.scss'
 
 function CustomToggle({ children, eventKey }) {
@@ -51,13 +52,13 @@ export default class Transaction extends Component {
 
   render = () => {
     
-    console.log("render")
-    console.log(this.state.txidToVinAddressAmountMap)
     return (
         <Accordion>
             <Card border="dark">
                 <Card.Header>
-                    <div className="alignLeft">{this.props.tx.txid}</div>
+                    <Link to={'/transaction/'+this.props.tx.txid} variant='secondary'>
+                        <div className="alignLeft">{this.props.tx.txid}</div>
+                    </Link>
                     <div className="alignRight"><CustomToggle>Details</CustomToggle></div>
                 </Card.Header>
                 <Accordion.Collapse eventKey="0">
@@ -75,38 +76,49 @@ export default class Transaction extends Component {
                             <Row>
                                 <Col xs={6}>
                                     <div>
-                                        <p className="alignLeft">Input Transactions </p>
+                                        <p className="alignLeft">Input Address </p>
+                                        <p className="alignRight"><b>Sent</b></p>
                                     </div>
                                     <hr className="columnRuler"/>
                                 </Col>
-                                <Col xs={4}>
+                                <Col xs={6}>
                                     <div>
-                                        <p className="alignLeft">Output Addresses </p> 
+                                        <p className="alignLeft">Output Address</p> 
+                                        <p className="alignRight"><b>Received</b></p>
                                     </div>
-                                    <hr className="columnRuler"/>
-                                </Col>
-                                <Col xs={2}>
-                                    <p className="alignRight">
-                                        <b>Vout Amount</b>
-                                    </p>
                                     <hr className="columnRuler"/>
                                 </Col>
                             </Row>
                             {[...Array(Math.max(this.props.tx.vin.length, this.props.tx.vout.length))].map((e, indx) => (
                                 <div key={e}>
                                     <Row>
-                                        <Col xs={6}>
+                                        <Col xs={4}>
                                             <div> {/* Im sorry in advance. Frontend is not my strong suit—js and functional programming is not my strong suit*/}
                                                 <p className="alignLeftNotStrong">
                                                     {this.props.tx.vin[indx] ? 
                                                     <>{this.props.tx.vin[indx].coinbase ? 
-                                                        <>Coinbase</> : 
+                                                        <>New Coins + Fees</> : 
                                                         this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid] ? 
-                                                            this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid].address+" -> "+this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid].amount :
+                                                            this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid].address :
                                                             <></>
                                                         }
                                                     </> : 
                                                     <></>}
+                                                </p>
+                                            </div>
+                                        </Col>
+                                        <Col xs={2}>
+                                            <div> {/* Im sorry in advance. Frontend is not my strong suit—js and functional programming is not my strong suit*/}
+                                                <p className="alignRight">
+                                                    {this.props.tx.vin[indx] ? 
+                                                    <>{this.props.tx.vin[indx].coinbase ? 
+                                                        <>New Coins + Fees</> : 
+                                                        this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid] ? 
+                                                            this.state.txidToVinAddressAmountMap[this.props.tx.vin[indx].txid].amount :
+                                                            <></>
+                                                        }
+                                                    </> : 
+                                                    <></>} 
                                                 </p>
                                             </div>
                                         </Col>

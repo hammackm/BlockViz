@@ -40,6 +40,13 @@ def getBlockByHeight(height: int):
 
     return json.dumps(block)
 
+def getBlockByHash(hash: str):
+
+    block = c.getBlockByHash(hash)
+    block = cleanBlock(block)
+
+    return json.dumps(block)
+
 def getTransaction(transaction_hash: str, block_hash: str):
 
     transaction = c.getTransactionByBlockHash(transaction_hash, block_hash)
@@ -65,7 +72,14 @@ def getTransactionsByHeight(height: int):
 def getTransactionbyTxid(txid: str):
 
     transaction = c.getTransactionByTxid(txid)
+    transaction = cleanBlock(transaction)
+
     return json.dumps(transaction)
+
+def getMemPool():
+    return json.dumps(
+        c.getMemPool()
+    )
 
 def cleanBlock(block: dict) -> dict:
 

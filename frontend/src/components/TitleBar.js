@@ -25,7 +25,7 @@ export default class TitleBar extends Component {
             <Navbar.Brand href="/">BlockViz</Navbar.Brand>
             <Nav className="mr-auto">
               <Nav.Link href="/">Blocks</Nav.Link>
-              <Nav.Link href="/transactions">Transactions</Nav.Link>
+              <Nav.Link href="/transaction">Transactions</Nav.Link>
               <Nav.Link href="/analytics">Analytics</Nav.Link>
               <Nav.Link href="/about">About</Nav.Link>
             </Nav>

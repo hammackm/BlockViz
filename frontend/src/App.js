@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { TitleBar, Footer, BlockTable, About, BlockDetails, Analytics, LiveChain} from "./components";
+import { TitleBar, Footer, BlockTable, About, BlockDetails, Analytics, TransactionTable, TransactionDetails} from "./components";
 
 class App extends Component {
   constructor(props) {
@@ -24,11 +24,12 @@ class App extends Component {
         <Router>
           <TitleBar />
           <Switch>
-            <Route path="/" exact component={() => <BlockTable blocks={this.state.blockList}/>} />
+            <Route path="/" exact component={() => <BlockTable/>} />
             <Route path="/about" exact component={() => <About />} />
             <Route path="/block/:blockHeight" component={BlockDetails} />
+            <Route path="/transaction/:txid" component={TransactionDetails} />
             <Route path="/analytics" exact component={() => <Analytics />} />
-            <Route path="/livechain" exact component={() => <LiveChain />} />
+            <Route path="/transaction" exact component={() => <TransactionTable />} />
           </Switch>
           <Footer />
         </Router>
