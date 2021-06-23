@@ -1,5 +1,5 @@
-.vscode
+.vscode/
 
-./backend/env/
+backend/env/
 
-./backend/migrations/
+backend/migrations/
