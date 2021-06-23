@@ -1,0 +1,8 @@
+{
+    "rpc":{
+        "host":"127.0.0.1",
+        "port":"5892",
+        "username":"admin",
+        "password":"password"
+    }
+}

@@ -2,12 +2,12 @@ import os
 import subprocess
 import pdb
 
-def getBlockByHash(hash: str) -> str:
+def getBlockByHash(hash: str):
     return eval(
         subprocess.check_output([os.path.join(os.getcwd(), 'vertcoin', 'vertcoin-cli.exe'), 'getblock', hash, str(1)]).decode().replace('\r\n', '')
         )
 
-def getMostRecentBlockHash() -> str:
+def getMostRecentBlockHash():
     return subprocess.check_output([os.path.join(os.getcwd(), 'vertcoin', 'vertcoin-cli.exe'), 'getbestblockhash']).decode()[:-2] #remove \n\r from output
 
 def getHashByHeight(height: int):

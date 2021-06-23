@@ -12,10 +12,10 @@ export default class TitleBar extends Component {
   }
 
   componentDidMount() {
-    //axios
-    //.get('https://api.coinbase.com/v2/prices/BTC-USD/spot')
-    //.then((res) => this.setState({vtcPriceInUsd: res.data.data.amount}))
-    //.catch((err) => console.log(err));
+    axios
+    .get('https://api.coinbase.com/v2/prices/BTC-USD/spot')
+    .then((res) => this.setState({vtcPriceInUsd: res.data.data.amount}))
+    .catch((err) => console.log(err));
   }
 
     render = () => {
@@ -26,6 +26,7 @@ export default class TitleBar extends Component {
             <Nav className="mr-auto">
               <Nav.Link href="/">Blocks</Nav.Link>
               <Nav.Link href="/transaction">Transactions</Nav.Link>
+              <Nav.Link href="/wallet">Wallets</Nav.Link>
               <Nav.Link href="/analytics">Analytics</Nav.Link>
               <Nav.Link href="/about">About</Nav.Link>
             </Nav>

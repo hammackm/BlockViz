@@ -1,30 +1,30 @@
 import React, { Component } from 'react';
 import {Table, Button, Spinner, Form, Col} from 'react-bootstrap';
-import {BlockHeightOverlay} from './index'
 import { Link } from "react-router-dom";
 import axios from "axios";
-import './style/TransactionTable.scss'
+import './style/BlockLanding.scss'
 
-export default class TransactionTable extends Component {
+export default class BlockLandin extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        transactionList: [],
+        blocksWanted: 10,
+        blockList: [],
         loading: true,
-        transactionFormData: '',
+        blockFormData: '',
       }
     }
 
 
     componentDidMount() {
-      this.getMemPool();
+      this.getBlocks(this.state.blocksWanted);
     }
   
-    getMemPool = () => {
+    getBlocks = () => {
       axios
-      .get("/mempool/")
+      .get("/recent/block/" + this.state.blocksWanted)
       .then((res) => this.setState({
-        transactionList: res.data,
+        blockList: res.data,
         loading: false,
       }))
       .catch((err) => console.log(err));
@@ -32,16 +32,29 @@ export default class TransactionTable extends Component {
 
     handleShowMoreClick = () => {
       this.setState({
+        blocksWanted: this.state.blocksWanted+25,
         loading: true
-      }, () => this.getMemPool()
+      }, 
+        () => {this.getBlocks(this.state.blocksWanted)}
         )
     }
 
     onFormChange = (event) => {
       event.preventDefault()
-      this.setState({
-        transactionFormData: event.target.value
-      })
+
+      if(event.target.value.length === 64) {
+        axios
+        .get("/blockhash/" + event.target.value)
+        .then((res) => this.setState({
+          blockFormData: res.data.height
+        }))
+        .catch((err) => console.log(err));
+      }
+      else {
+        this.setState({
+          blockFormData: event.target.value
+        })
+      }
     }
 
 
@@ -49,7 +62,7 @@ export default class TransactionTable extends Component {
 
         return (
           <main className="container">
-            <h2 className="text-black my-4">View Vertcoin Transactions</h2>
+            <h2 className="text-black my-4">Vertcoin Blocks</h2>
             <Form>
               <Form.Row className="align-items-center">
                 <Col xs="4">
@@ -59,11 +72,11 @@ export default class TransactionTable extends Component {
                     onChange={this.onFormChange}
                     name="block"
                     id="inlineFormInput"
-                    placeholder="Transaction ID"
+                    placeholder="Block Height or Hash"
                   />
                 </Col>
                 <Col xs="auto">
-                <Link to={'/transaction/'+this.state.transactionFormData} variant='secondary'> {/* Not Proper HTML */}
+                <Link to={'/block/'+this.state.blockFormData} variant='secondary'> {/* Not Proper HTML */}
                   <Button type="submit" className="mb-2" variant="outline-dark">
                     Go
                   </Button>
@@ -73,30 +86,40 @@ export default class TransactionTable extends Component {
               <Form.Row>
                 <Col>
                   <Form.Text id="blockdHelpInline" muted>
-                    Enter Transaction ID to view more details.
+                    Enter Block Height or Hash to view more details and transactions.
                   </Form.Text>
                 </Col>
               </Form.Row>
             </Form>
-            <h3 className="text-black my-4">Unmined Vertcoin Transactions</h3>
+            <h3 className="text-black my-4">Latest Blocks</h3>
             <div className="block table">
               <Table striped bordered hover variant="dark">
                 <thead>
                   <tr>
-                    <th>Transaction ID</th>
+                    <th>Block Height</th>
+                    <th>Timestamp</th>
+                    <th># Transactions</th>
+                    <th># Confirmations</th>
+                    <th>Size</th>
+                    <th>Difficulty</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {this.state.transactionList.map(txid => (
-                    <tr key={txid}>
-                        <td><Link to={'/transaction/'+txid} variant='secondary'>{txid}</Link></td>
+                  {this.state.blockList.map(block => (
+                    <tr key={block.height}>
+                        <td><Link to={'/block/'+block.height} variant='secondary'>{block.height}</Link></td>
+                        <td>{block.time}</td>
+                        <td>{block.nTx}</td>
+                        <td>{block.confirmations}</td>
+                        <td>{block.size}</td>
+                        <td>{block.difficulty}</td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
             </div>
             {this.state.loading ? <div className="centerSpinner"><Spinner animation="border" role="status"></Spinner></div> : <div /> }
-            <div className="text-center"><Button  onClick={this.handleShowMoreClick} variant="outline-dark">———— Refresh Pool ————</Button></div>
+            <div className="text-center"><Button  onClick={this.handleShowMoreClick} variant="outline-dark">———— Show More ————</Button></div>
         </main>
           
         );

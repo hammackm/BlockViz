@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { TitleBar, Footer, BlockTable, About, BlockDetails, Analytics, TransactionTable, TransactionDetails} from "./components";
+import { TitleBar, Footer, BlockLanding, About, BlockDetails, Analytics, TransactionLanding, TransactionDetails, WalletLanding, WalletDetails} from "./components";
+import './App.scss'
 
 class App extends Component {
   constructor(props) {
@@ -24,12 +25,14 @@ class App extends Component {
         <Router>
           <TitleBar />
           <Switch>
-            <Route path="/" exact component={() => <BlockTable/>} />
+            <Route path="/" exact component={() => <BlockLanding/>} />
             <Route path="/about" exact component={() => <About />} />
             <Route path="/block/:blockHeight" component={BlockDetails} />
             <Route path="/transaction/:txid" component={TransactionDetails} />
+            <Route path="/wallet/:address" component={WalletDetails} />
             <Route path="/analytics" exact component={() => <Analytics />} />
-            <Route path="/transaction" exact component={() => <TransactionTable />} />
+            <Route path="/transaction" exact component={() => <TransactionLanding />} />
+            <Route path="/wallet" exact component={() => <WalletLanding />} />
           </Switch>
           <Footer />
         </Router>
