@@ -21,10 +21,10 @@ def rpcCommand(command, args=[]):
 
 def cleanRPCReponse(response):
 
-    response = response.replace('\n', '')
-    response = response.replace('null', '0')
-    response = response.replace('true', 'True')
-    response = response.replace('false', 'False')
+    response = response.replace('\n', '') \
+        .replace('null', '0') \
+        .replace('true', 'True') \
+        .replace('false', 'False')
 
     return response
 
@@ -82,8 +82,8 @@ def getTransactionsByHeight(height: int):
 
     for tx_hash in tx_list:
         tx = getTransaction(tx_hash, block_hash)
-        tx = tx.replace('true', 'True')
-        tx = tx.replace('false', 'False')
+        tx = tx.replace('true', 'True') \
+            .replace('false', 'False')
         tx = eval(tx)
         tx_objects_list.append(tx)
 
@@ -93,7 +93,7 @@ def getTransactionbyTxid(txid: str):
 
     transaction = rpcCommand('getrawtransaction', [txid, 1])['result']
     transaction = cleanBlock(transaction)
-
+    print(transaction)
     return json.dumps(transaction)
 
 def getMemPool():

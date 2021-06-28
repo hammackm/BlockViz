@@ -9,6 +9,7 @@ class Block(models.Model):
     prevhash = models.CharField(max_length=64)
 
     numtransactions = models.PositiveIntegerField()
+    confirmations = models.PositiveIntegerField()
     height = models.PositiveIntegerField()
     merkleroot = models.TextField()
     minedby = models.TextField()
@@ -39,8 +40,10 @@ class Transaction(models.Model):
 class Address(models.Model):
     address = models.TextField(primary_key=True)
     received = models.FloatField()
-    send = models.FloatField()
+    sent = models.FloatField()
     balance = models.FloatField()
     numtransactions = models.IntegerField()
     transactions = models.ManyToManyField('Transaction', related_name="addresses")
+    tx_where_sent = models.JSONField()
+    tx_where_received = models.JSONField()
     json = models.JSONField()
