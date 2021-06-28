@@ -53,7 +53,7 @@ def getNMostRecentBlocks(num_blocks: int) -> None:
 
 def getBlockByHeight(height: int):
 
-    height = int(height)
+    height = int(height) #sometime comes in as a str?
     hash = rpcCommand('getblockhash', [height])['result']
     block_dict = rpcCommand('getblock', [hash, 1])['result']
     block_dict = cleanBlock(block_dict)
