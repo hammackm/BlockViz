@@ -3,8 +3,6 @@ from django.http import HttpResponse, JsonResponse
 
 from . import vertcoin_node_rpc_service as rpc
 
-from .models import Block, Transaction, Address
-
 # Create your views here.
 def getNMostRecentBlocks(request, number):
     return HttpResponse(rpc.getNMostRecentBlocks(number))

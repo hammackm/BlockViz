@@ -16,8 +16,8 @@ def rpcCommand(command, args=[]):
     r = requests.post(url = url, data=body, headers=headers)
 
     response = cleanRPCReponse(r.text)
-    response = eval(response)
-    return response
+    response_dict = eval(response)
+    return response_dict
 
 def cleanRPCReponse(response):
 
@@ -31,23 +31,23 @@ def cleanRPCReponse(response):
 def getMostRecentBlock():
 
     hash = rpcCommand('getbestblockhash')['result']
-    block = rpcCommand('getblock', [hash, 1])['result']
-    block = cleanBlock(block)
+    block_dict = rpcCommand('getblock', [hash, 1])['result']
+    block_dict = cleanBlock(block_dict)
    
-    return block #dont need json dumps ?
+    return block_dict #dont need json dumps ?
 
 def getNMostRecentBlocks(num_blocks: int) -> None:
 
     hash = rpcCommand('getbestblockhash')['result']
-    block = rpcCommand('getblock', [hash, 1])['result']
-    block = cleanBlock(block)
-    block_list = [block]
+    block_dict = rpcCommand('getblock', [hash, 1])['result']
+    block_dict = cleanBlock(block_dict)
+    block_list = [block_dict]
 
     for i in range(1,num_blocks):
-        hash = block['previousblockhash']
-        block = rpcCommand('getblock', [hash, 1])['result']
-        block = cleanBlock(block)
-        block_list.append(block)
+        hash = block_dict['previousblockhash']
+        block_dict = rpcCommand('getblock', [hash, 1])['result']
+        block_dict = cleanBlock(block_dict)
+        block_list.append(block_dict)
     
     return json.dumps(block_list)
 
@@ -55,52 +55,51 @@ def getBlockByHeight(height: int):
 
     height = int(height)
     hash = rpcCommand('getblockhash', [height])['result']
-    block = rpcCommand('getblock', [hash, 1])['result']
-    block = cleanBlock(block)
+    block_dict = rpcCommand('getblock', [hash, 1])['result']
+    block_dict = cleanBlock(block_dict)
 
-    return json.dumps(block)
+    return json.dumps(block_dict)
 
 def getBlockByHash(hash: str):
 
-    block = rpcCommand('getblock', [hash, 1])['result']
-    block = cleanBlock(block)
+    block_dict = rpcCommand('getblock', [hash, 1])['result']
+    block_dict = cleanBlock(block_dict)
 
-    return json.dumps(block)
+    return json.dumps(block_dict)
 
 def getTransaction(transaction_hash: str, block_hash: str):
 
-    transaction = rpcCommand('getrawtransaction', [transaction_hash, 1, block_hash])['result']
+    transaction_dict = rpcCommand('getrawtransaction', [transaction_hash, 1, block_hash])['result']
 
-    return json.dumps(transaction)
+    return json.dumps(transaction_dict)
 
 def getTransactionsByHeight(height: int):
 
-    block = eval(getBlockByHeight(height))
-    block_hash = block['hash']
-    tx_list = block['tx']
-    tx_objects_list = []
+    block_dict = eval(getBlockByHeight(height))
+    block_hash = block_dict['hash']
+    tx_list = block_dict['tx']
+    tx_dict_list = []
 
     for tx_hash in tx_list:
-        tx = getTransaction(tx_hash, block_hash)
-        tx = tx.replace('true', 'True') \
+        tx_dict = getTransaction(tx_hash, block_hash)
+        tx_dict = tx_dict.replace('true', 'True') \
             .replace('false', 'False')
-        tx = eval(tx)
-        tx_objects_list.append(tx)
+        tx_dict = eval(tx_dict)
+        tx_dict_list.append(tx_dict)
 
-    return json.dumps(tx_objects_list)
+    return json.dumps(tx_dict_list)
 
 def getTransactionbyTxid(txid: str):
 
-    transaction = rpcCommand('getrawtransaction', [txid, 1])['result']
-    transaction = cleanBlock(transaction)
-    print(transaction)
-    return json.dumps(transaction)
+    transaction_dict = rpcCommand('getrawtransaction', [txid, 1])['result']
+    transaction_dict = cleanBlock(transaction_dict)
+    return json.dumps(transaction_dict)
 
 def getMemPool():
 
-    mempool = rpcCommand('getrawmempool')['result']
+    mempool_dict = rpcCommand('getrawmempool')['result']
 
-    return json.dumps(mempool)
+    return json.dumps(mempool_dict)
 
 def cleanBlock(block: dict) -> dict:
 
