@@ -1,40 +1,40 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
-from . import cli
+from . import vertcoin_node_rpc_service as rpc
 
 from .models import Block, Transaction, Address
 
 # Create your views here.
 def getNMostRecentBlocks(request, number):
-    return HttpResponse(cli.getNMostRecentBlocks(number))
+    return HttpResponse(rpc.getNMostRecentBlocks(number))
 
 def getNMostRecentTransactions(request, number):
     return HttpResponse(
-        cli.getNMostRecentBlocks()
+        rpc.getNMostRecentBlocks()
     )
 
 def getBlockByHeight(request, height):
     return HttpResponse(
-        cli.getBlockByHeight(height)
+        rpc.getBlockByHeight(height)
     )
 
 def getBlockByHash(request, hash):
     return HttpResponse(
-        cli.getBlockByHash(hash)
+        rpc.getBlockByHash(hash)
     )
 
 def getTransactionsByHeight(request, height):
     return HttpResponse(
-        cli.getTransactionsByHeight(height)
+        rpc.getTransactionsByHeight(height)
     )
 
 def getTransactionbyTxid(request, txid):
     return HttpResponse(
-        cli.getTransactionbyTxid(txid)
+        rpc.getTransactionbyTxid(txid)
     )
 
 def getMemPool(request):
     return HttpResponse(
-        cli.getMemPool()
+        rpc.getMemPool()
     )
