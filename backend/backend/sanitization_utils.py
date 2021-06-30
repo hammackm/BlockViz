@@ -15,6 +15,9 @@ def number_input(number) -> int:
     return int(result_str)
 
 def hash_input(hash: str) -> str:
+    '''
+    Removes all characters that are not hex digits
+    '''
 
     hash_str = hash.lower()
 

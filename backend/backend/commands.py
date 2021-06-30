@@ -1,6 +1,5 @@
 import os
 import subprocess
-import pdb
 
 def getBlockByHash(hash: str):
     return eval(

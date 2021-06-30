@@ -1,7 +1,7 @@
 #Python utilities to connect with the vertcoin-cli
 #command line interface to connect with a running node
 import json
-import time
+from datetime import datetime
 import requests
 
 with open("./backend/vertcoin_node_config.json") as config_file:
@@ -35,6 +35,17 @@ def getMostRecentBlock():
     block_dict = cleanBlock(block_dict)
    
     return block_dict #dont need json dumps ?
+
+def getMostRecentBlockHeight():
+    '''
+    Returns the height of the most recent block
+    '''
+
+    hash = rpcCommand('getbestblockhash')['result']
+    block_dict = rpcCommand('getblock', [hash, 1])['result']
+    height = block_dict['height']
+
+    return height
 
 def getNMostRecentBlocks(num_blocks: int) -> None:
 
@@ -108,6 +119,6 @@ def cleanBlock(block: dict) -> dict:
 
     for key in clean_time_keys_list:
         if key in keys:
-            block[key] = time.ctime(block[key])
+            block[key] = datetime.fromtimestamp(block[key]).strftime('%Y-%m-%d %H:%M:%S.%f')
 
     return block

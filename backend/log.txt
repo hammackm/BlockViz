@@ -1,0 +1,1 @@
+[INFO]: 2021-06-30 13:40:37.515789 database_update_service Updating the database with block of height 163
