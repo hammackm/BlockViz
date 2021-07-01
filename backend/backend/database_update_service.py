@@ -23,7 +23,7 @@ def updateDatabase():
     latest_node_block_height = rpc.getMostRecentBlockHeight()
     latest_db_block_height = chain_model.latestdbblockheight
 
-    for height in range(latest_db_block_height+1, 10000):
+    for height in range(latest_db_block_height+1, latest_node_block_height):
         print('INFO', 'database_update_service', f'Updating the database with block of height {height}')
         updateDatabaseByHeight(height)
 
