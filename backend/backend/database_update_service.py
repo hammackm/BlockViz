@@ -1,9 +1,10 @@
+import pdb
 from .models import Chain, Block, Transaction, Address
 import json
 from . import vertcoin_node_rpc_service as rpc
 from . import logging_service as log
 
-def inititalize():
+def initialize():
     '''
     A method to be used only when the database is empty, or is not populated.
     '''
@@ -17,13 +18,13 @@ def updateDatabase():
     Update the database with all the latest blocks, transactions, and wallets since the last entry in the database
     '''
 
-    chain_model = Chain.objects.get(id=1)
+    chain_model = Chain.objects.get(id=1) # IDs are 1-indexed
 
     latest_node_block_height = rpc.getMostRecentBlockHeight()
     latest_db_block_height = chain_model.latestdbblockheight
 
-    for height in range(latest_db_block_height+1, latest_node_block_height+1):
-        log.log('INFO', 'database_update_service', f'Updating the database with block of height {height}')
+    for height in range(latest_db_block_height+1, 10000):
+        print('INFO', 'database_update_service', f'Updating the database with block of height {height}')
         updateDatabaseByHeight(height)
 
 
@@ -73,13 +74,15 @@ def createNewTransactionEntry(transaction_dict: dict):
     output_address_list = []
     coinbase=False
 
+    
     #Iterate through the input transactions in the transaction
     #Retreive the input transactions to get the addresses and amounts that are used as inputs
     for vin in transaction_dict['vin']:
         #If the transaction is not a coinbase (not the company!) transaction
         if 'coinbase' not in vin.keys():
             vin_tx_dict = json.loads(rpc.getTransactionbyTxid(vin['txid']))
-            in_addr = vin_tx_dict['vout'][vin['vout']]['scriptPubKey']['addresses'][0]
+            #Some (typcially) earlier transactions do not have an address input. This needs to be explored further.
+            in_addr = vin_tx_dict['vout'][vin['vout']]['scriptPubKey']['addresses'][0] if 'addresses' in  vin_tx_dict['vout'][vin['vout']]['scriptPubKey'].keys() else None
             in_amt = vin_tx_dict['vout'][vin['vout']]['value']
 
             input_address_list.append(in_addr)
@@ -90,18 +93,22 @@ def createNewTransactionEntry(transaction_dict: dict):
 
     #Iterate through outputs in the transaction
     for vout in transaction_dict['vout']:
-        #Some (typcially) earlier transactions would not have an address output
-        out_addr = vout['scriptPubKey']['addresses'][0] if 'addressess' in vout['scriptPubKey'].keys() else None
+        #Some (typcially) earlier transactions do not have an address output
+        out_addr = vout['scriptPubKey']['addresses'][0] if 'addresses' in vout['scriptPubKey'].keys() else None
         out_amt = vout['value']
 
         output_address_list.append(out_addr)
         output_address_amt_map[out_addr] = out_amt
 
-    #Sum all of the currency exchanged within the particular transaction
-    netexchanged = sum(input_address_amt_map.values()) + sum(output_address_amt_map.values())
-    #The fee of any transaction is the input amounts minus the output amounts
-    fee = sum(input_address_amt_map.values()) - sum(output_address_amt_map.values())
-
+    if coinbase:
+        netexchanged = transaction_dict['vout'][0]['value']
+        fee = 0
+    else:
+        #Sum all of the currency exchanged within the particular transaction
+        netexchanged = sum(input_address_amt_map.values()) + sum(output_address_amt_map.values())
+        #The fee of any transaction is the input amounts minus the output amounts
+        fee = sum(input_address_amt_map.values()) - sum(output_address_amt_map.values())
+    
     block_model = Block.objects.get(pk=transaction_dict['blockhash'])
 
     transaction_model = Transaction(
@@ -146,12 +153,11 @@ def updateAddressWithTransaction(address_str: str, txid_str: str, input_tx: bool
     
     address_model.save() #not sure if this is needed
 
-    
-
-def createNewAddressEntry(address_str: str, txid_str: str, amt: float):
+def createNewAddressEntry(address_str: str, txid_str: str, input_tx: bool, amt: float):
     '''
     Creates a new Address entry into the database
-    Assumes that this address is on the receiving end of a transaction
+    Addresses should be on the receiving end of a transaction but not always.
+    Special attention should be paid to the case where it is not on the receiving end. This means that a prior address/tx is missing from the database/blockchain.
     '''
 
     address_model = Address(
@@ -160,14 +166,19 @@ def createNewAddressEntry(address_str: str, txid_str: str, amt: float):
                         sent = 0,
                         balance = amt,
                         numtransactions = 1,
-                        tx_where_sent = {},
-                        tx_where_received = {txid_str: amt}
+                        tx_where_sent = {txid_str: amt} if input_tx else {},
+                        tx_where_received = {txid_str: amt} if not input_tx else {}
                 )
 
     address_model.save()
 
+    #Now set the related fields within address
     transaction_model = Transaction.objects.get(pk=txid_str)
 
+    if input_tx:
+        address_model.transactionswhereinput.set([transaction_model])
+    else:
+        address_model.transactionswhereoutput.set([transaction_model])
     address_model.transactions.set([transaction_model])
 
 def updateDatabaseByHeight(height: int):
@@ -180,22 +191,30 @@ def updateDatabaseByHeight(height: int):
         log.log('WARNING', 'database_update_service', 'Trying to create a new block entry when the block already exists in the database!')
         return
 
+    #pdb.set_trace()
     block_dict = json.loads(rpc.getBlockByHeight(height))
     createNewBlockEntry(block_dict)
 
+    #Iterate through all transactions in the block
     for txid in block_dict['tx']:
         transaction_dict = json.loads(rpc.getTransactionbyTxid(txid))
 
         input_address_list, output_address_list, input_address_amt_map, output_address_amt_map = \
         createNewTransactionEntry(transaction_dict)
 
+        #Filter out any None values in the lists
+        input_address_list = list(filter(None, input_address_list))
+        output_address_list = list(filter(None, output_address_list))
+
+        #Update/Add all Input Addresses in this transaction
         for address_str in input_address_list:
             if Address.objects.filter(pk=address_str).exists():
                 updateAddressWithTransaction(address_str, txid, True, input_address_amt_map[address_str])
             else:
-                log.log('WARNING', 'database_update_service', 'Input Address to transaction is not in the Database!')
+                log.log('WARNING', 'database_update_service', f'Input Address to transaction is not in the Database! TXID: {txid}, Address: {address_str}')
+                createNewAddressEntry(address_str, txid, True, input_address_amt_map[address_str])
                 
-
+        #Update/Add all Output Addresses in this transaction
         for address_str in output_address_list:
             if Address.objects.filter(pk=address_str).exists():
                 updateAddressWithTransaction(address_str, txid, False, output_address_amt_map[address_str])
@@ -204,4 +223,4 @@ def updateDatabaseByHeight(height: int):
                 Create a new address entry in the Database
                 Assuming that this address is not part of any block or transaction already contained in the chain.
                 '''
-                createNewAddressEntry(address_str, txid, output_address_amt_map[address_str])
+                createNewAddressEntry(address_str, txid, False, output_address_amt_map[address_str])

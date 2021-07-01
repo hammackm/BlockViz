@@ -28,9 +28,8 @@ class Block(models.Model):
 class Transaction(models.Model):
 
     id = models.TextField(primary_key=True)
-    block = models.ForeignKey("Block", on_delete=models.SET_NULL, null=True)
+    block = models.ForeignKey("Block", on_delete=models.SET_NULL, null=True, related_name='transactions')
     coinbase = models.BooleanField(null=True)
-    inputtxids = models.ManyToManyField('Transaction', related_name="transactionswhereinput")
     inputaddresses = models.ManyToManyField('Address', related_name="transactionswhereinput")
     outputaddresses = models.ManyToManyField('Address', related_name="transactionswhereoutput")
     inputaddressmap = models.JSONField(null=True)

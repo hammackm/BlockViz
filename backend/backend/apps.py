@@ -8,5 +8,5 @@ class BackendConfig(AppConfig):
 
         from . import database_update_service
 
-        #database_update_service.inititalize()
+        #database_update_service.initialize()
         database_update_service.updateDatabase()
