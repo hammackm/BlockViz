@@ -1,10 +1,13 @@
 from django.http import HttpResponse
 
-from . import vertcoin_node_rpc_service as rpc
+from .vertcoin_node_rpc_service import NodeRPCService
 from . import sanitization_utils
+import pdb
+
+rpc = NodeRPCService()
 
 def getNMostRecentBlocks(request, unsafe_number):
-
+    
     sanitized_number = sanitization_utils.number_input(unsafe_number)
     return HttpResponse(
         rpc.getNMostRecentBlocks(sanitized_number)

@@ -1,17 +1,20 @@
-import pdb
 from .models import Chain, Block, Transaction, Address
 import json
-from . import vertcoin_node_rpc_service as rpc
+from .vertcoin_node_rpc_service import NodeRPCService
 from . import logging_service as log
+from datetime import datetime, timezone
 
 def initialize():
     '''
     A method to be used only when the database is empty, or is not populated.
+    It sets the latestdbblockheight to 0. This means that the entire blockchain will be populated into the database
     '''
-
-    chain_model = Chain(latestdbblockheight=0)
-    chain_model.save()
-
+    #If initialization has already happened, dont do it again!
+    if len(Chain.objects.all()) > 0:
+        log.log('WARNING', 'database_update_service', 'Attempting to initialize Chain when it already has an entry! Initialization not performed.')
+    else:
+        chain_model = Chain(latestdbblockheight=0)
+        chain_model.save()
 
 def updateDatabase():
     '''
@@ -20,12 +23,15 @@ def updateDatabase():
 
     chain_model = Chain.objects.get(id=1) # IDs are 1-indexed
 
+    #Create RPC session to init requests session and config file
+    rpc = NodeRPCService()
+
     latest_node_block_height = rpc.getMostRecentBlockHeight()
     latest_db_block_height = chain_model.latestdbblockheight
 
     for height in range(latest_db_block_height+1, latest_node_block_height):
-        print('INFO', 'database_update_service', f'Updating the database with block of height {height}')
-        updateDatabaseByHeight(height)
+        print('INFO', 'database_update_service', f'Updating the database with block height {height}')
+        updateDatabaseWithAddressesOnlyByHeight(height, rpc)
 
 
 def createNewBlockEntry(block_dict: dict):
@@ -33,6 +39,10 @@ def createNewBlockEntry(block_dict: dict):
     Creates a new block entry in the database
     Updates the chain entry with the latest block height
     '''
+
+    #Adding a timezone and formatting the time object
+    dt = datetime.fromtimestamp(block_dict['timestamp'])
+    timestamp = dt.replace(tzinfo=timezone.utc)
 
     block_model = Block(
         hash= block_dict['hash'], 
@@ -42,7 +52,7 @@ def createNewBlockEntry(block_dict: dict):
         height= block_dict['height'], 
         merkleroot= block_dict['merkleroot'], 
         minedby= None, 
-        timestamp= block_dict['time'], 
+        timestamp= timestamp, 
         difficulty= block_dict['difficulty'], 
         size= block_dict['size'], 
         nonce= block_dict['nonce'], 
@@ -62,11 +72,7 @@ def createNewBlockEntry(block_dict: dict):
     chain_model.latestdbblockheight = block_dict['height']
     chain_model.save()
 
-def createNewTransactionEntry(transaction_dict: dict):
-    '''
-    Creates a new transaction entry in the database.
-    Returns inputaddress_list, outputaddress_list, and address_amt_map to be used to update and create new Wallet/Address entries in the database
-    '''
+def getIOAddressListAndMap(transaction_dict: dict, rpc: NodeRPCService):
 
     input_address_amt_map = {}
     output_address_amt_map = {}
@@ -74,7 +80,6 @@ def createNewTransactionEntry(transaction_dict: dict):
     output_address_list = []
     coinbase=False
 
-    
     #Iterate through the input transactions in the transaction
     #Retreive the input transactions to get the addresses and amounts that are used as inputs
     for vin in transaction_dict['vin']:
@@ -100,6 +105,23 @@ def createNewTransactionEntry(transaction_dict: dict):
         output_address_list.append(out_addr)
         output_address_amt_map[out_addr] = out_amt
 
+    return input_address_list, output_address_list, input_address_amt_map, output_address_amt_map
+
+def createNewTransactionEntry(transaction_dict: dict, rpc: NodeRPCService):
+    '''
+    Creates a new transaction entry in the database.
+    Returns inputaddress_list, outputaddress_list, and address_amt_map to be used to update and create new Wallet/Address entries in the database
+    '''
+
+    
+    coinbase=False
+
+    input_address_list, \
+    output_address_list, \
+    input_address_amt_map, \
+    output_address_amt_map = \
+        getIOAddressListAndMap(transaction_dict, rpc)
+    
     if coinbase:
         netexchanged = transaction_dict['vout'][0]['value']
         fee = 0
@@ -108,6 +130,10 @@ def createNewTransactionEntry(transaction_dict: dict):
         netexchanged = sum(input_address_amt_map.values()) + sum(output_address_amt_map.values())
         #The fee of any transaction is the input amounts minus the output amounts
         fee = sum(input_address_amt_map.values()) - sum(output_address_amt_map.values())
+
+    #Adding a timezone and formatting the time object
+    dt = datetime.fromtimestamp(transaction_dict['timestamp'])
+    timestamp = dt.replace(tzinfo=timezone.utc)
     
     block_model = Block.objects.get(pk=transaction_dict['blockhash'])
 
@@ -118,7 +144,7 @@ def createNewTransactionEntry(transaction_dict: dict):
         inputaddressmap= input_address_amt_map, 
         outputaddressmap= output_address_amt_map, 
         size= transaction_dict['size'], 
-        timestamp= transaction_dict['time'], 
+        timestamp= timestamp, 
         netexchanged= netexchanged, 
         fee= fee,
         confirmations= transaction_dict['confirmations'], 
@@ -132,24 +158,24 @@ def createNewTransactionEntry(transaction_dict: dict):
 def updateAddressWithTransaction(address_str: str, txid_str: str, input_tx: bool, amt: float):
 
     address_model = Address.objects.get(pk=address_str)
-    transaction_model = Transaction.objects.get(pk=txid_str)
+    #transaction_model = Transaction.objects.get(pk=txid_str)
 
     address_model.numtransactions += 1
-    address_model.transactions.add(transaction_model)
+    address_model.transactions.append(txid_str)
     
     #WILL NEED TO REWRITE THIS TO USE SATOSHIS INSTEAD OF PYTHON FLOAT VALUES
     if input_tx:
         address_model.sent += amt
         address_model.balance -= amt
         address_model.tx_where_sent[txid_str] = amt #dont know if this will work
-        address_model.transactionswhereinput.add(transaction_model)
+        #address_model.transactionswhereinput.add(transaction_model)
         
 
     else:
         address_model.received += amt
         address_model.balance += amt
         address_model.tx_where_received[txid_str] = amt
-        address_model.transactionswhereoutput.add(transaction_model)
+        #address_model.transactionswhereoutput.add(transaction_model)
     
     address_model.save() #not sure if this is needed
 
@@ -166,12 +192,14 @@ def createNewAddressEntry(address_str: str, txid_str: str, input_tx: bool, amt: 
                         sent = 0,
                         balance = amt,
                         numtransactions = 1,
+                        transactions= [txid_str],
                         tx_where_sent = {txid_str: amt} if input_tx else {},
                         tx_where_received = {txid_str: amt} if not input_tx else {}
                 )
 
     address_model.save()
 
+    '''
     #Now set the related fields within address
     transaction_model = Transaction.objects.get(pk=txid_str)
 
@@ -179,9 +207,51 @@ def createNewAddressEntry(address_str: str, txid_str: str, input_tx: bool, amt: 
         address_model.transactionswhereinput.set([transaction_model])
     else:
         address_model.transactionswhereoutput.set([transaction_model])
-    address_model.transactions.set([transaction_model])
+    '''
 
-def updateDatabaseByHeight(height: int):
+def updateDatabaseWithAddressesOnlyByHeight(height: int, rpc: NodeRPCService):
+    '''
+    Update only the address model with addresses that are contained within the block.
+    '''
+
+    block_dict = json.loads(rpc.getBlockByHeight(height)) #Explicit socket is needed because making requests so soon after each other is having problems
+
+    #Iterate through all transactions in the block
+    for txid in block_dict['tx']:
+
+        transaction_dict = json.loads(rpc.getTransactionbyTxid(txid))
+
+        input_address_list, \
+        output_address_list, \
+        input_address_amt_map, \
+        output_address_amt_map = \
+            getIOAddressListAndMap(transaction_dict, rpc)
+
+        #Filter out any None values in the lists
+        input_address_list = list(filter(None, input_address_list))
+        output_address_list = list(filter(None, output_address_list))
+
+        #Update/Add all Input Addresses in this transaction
+        for address_str in input_address_list:
+            if Address.objects.filter(pk=address_str).exists():
+                updateAddressWithTransaction(address_str, txid, True, input_address_amt_map[address_str])
+            else:
+                log.log('WARNING', 'database_update_service', f'Input Address to transaction is not in the Database! TXID: {txid}, Address: {address_str}')
+                createNewAddressEntry(address_str, txid, True, input_address_amt_map[address_str])
+                
+        #Update/Add all Output Addresses in this transaction
+        for address_str in output_address_list:
+            if Address.objects.filter(pk=address_str).exists():
+                updateAddressWithTransaction(address_str, txid, False, output_address_amt_map[address_str])
+            else:
+                '''
+                Create a new address entry in the Database
+                Assuming that this address is not part of any block or transaction already contained in the chain.
+                '''
+                createNewAddressEntry(address_str, txid, False, output_address_amt_map[address_str])
+
+
+def updateDatabaseByHeight(height: int, rpc: NodeRPCService):
     '''
     Update the database with data coming from a single block.
     Assuming this block is not already an entry in the database.
@@ -191,7 +261,6 @@ def updateDatabaseByHeight(height: int):
         log.log('WARNING', 'database_update_service', 'Trying to create a new block entry when the block already exists in the database!')
         return
 
-    #pdb.set_trace()
     block_dict = json.loads(rpc.getBlockByHeight(height))
     createNewBlockEntry(block_dict)
 
@@ -200,7 +269,7 @@ def updateDatabaseByHeight(height: int):
         transaction_dict = json.loads(rpc.getTransactionbyTxid(txid))
 
         input_address_list, output_address_list, input_address_amt_map, output_address_amt_map = \
-        createNewTransactionEntry(transaction_dict)
+        createNewTransactionEntry(transaction_dict, rpc)
 
         #Filter out any None values in the lists
         input_address_list = list(filter(None, input_address_list))

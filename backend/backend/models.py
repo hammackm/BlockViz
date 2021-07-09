@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 # Create your models here.
 
 class Chain(models.Model):
@@ -47,6 +48,6 @@ class Address(models.Model):
     sent = models.FloatField(null=True)
     balance = models.FloatField(null=True)
     numtransactions = models.IntegerField(null=True)
-    transactions = models.ManyToManyField('Transaction', related_name="addresses")
+    transactions = ArrayField(models.TextField(null=True), null=True)
     tx_where_sent = models.JSONField(null=True)
     tx_where_received = models.JSONField(null=True)

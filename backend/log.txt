@@ -1,1 +1,1 @@
-[WARNING]: 2021-06-30 19:20:48.333784 database_update_service Trying to create a new block entry when the block already exists in the database!
+[WARNING]: 2021-07-09 10:28:04.697047 vertcoin_node_rpc_service Could not bind to port: {bind_port}. Port is already in use
